@@ -22,7 +22,7 @@ for key, value in genre_russian.items():
 
 choice = input('\nВведиде номер жанра: ')
 
-films_file = str(os.getcwd()) + '/films.tsv'
+films_file = str(os.getcwd()) + 'film/film/films.tsv'
 
 with open(films_file, 'r') as f:
 	movies = [film for film in f if genre[choice] in film]
