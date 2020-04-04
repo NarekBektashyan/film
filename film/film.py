@@ -1,6 +1,11 @@
 from csv import DictReader
 import random 
 import os
+import requests
+
+
+kirill = ('абвгдеёжзийклмнопрстуфхцчшщъыьэюя')	
+kirill_and_co = ('абвгдеёжзийклмнопрстуфхцчшщъыьэюя ,.?1234567890')
 
 genre = {
 	 '1':'Drama','2': 'Comedy','3': 'Thriller', '4': 'Action', '5': 'Crime',
@@ -14,13 +19,11 @@ genre_russian = {
 	'10': 'Историческая', '11': 'Биография', '12': 'Военная', '13': 'Документальная'
 }
 
-print('Здравствуйте уважаемая Юлия!\nПожалуйста, выберите жанр.\n')
-
-for key, value in genre_russian.items():
-	print(key, value)
 
 
-choice = input('\nВведиде номер жанра: ')
+
+
+choice = '1'
 
 films_file = str(os.getcwd()) + '/film/film/films.tsv'
 
@@ -28,17 +31,43 @@ with open(films_file, 'r') as f:
 	movies = [film for film in f if genre[choice] in film]
 	
 choice = 'y'
-while 'y' in choice:
-	print('\nСоветую этот фильм.\n')
-	print(random.choice(movies))
-	choice = input('Найти другую?("y/n"): ')		
-	
 
+while choice != 'q':
+	print('Пожалуйста, выберите жанр.\n')
+	for key, value in genre_russian.items():
+		print(key, value)
+	choice = input('\nВведиде номер жанра: ')	
+	while not 'n' in choice and not 'g' in choice:
+		movie = random.choice(movies)
+		title, year = movie.split(',')[:2]
+		title = '+'.join(title.split())
+		year = str(year)
+		res = requests.get(f'https://ru.wikipedia.org/w/index.php?search={title}%2C{year}')
 
+		res = res.text.split('<')
 
+		new = [x for x in res if 'data-serp-pos' in x ]
 
-
-
-
-
-
+		link = new[0].split('"')[1]
+		res = requests.get('https://ru.wikipedia.org' + link)
+		title = [x for x in res.text.split('<') if 'title' in x]
+		title = title[0].split('>')[1].split('—')[0]
+		find_kirill = [x for x in kirill if x in title.lower()]
+		if not find_kirill:
+			continue
+		print('\nСоветую этот фильм.\n')	
+		print(title + ', ' + year)
+		print()
+		description = [x for x in res.text.split('</p>') if 'Редактировать раздел «Сюжет»' in x]
+		s = str(description)
+		x = s.find('<p>')
+		description = s[x:]
+		new = ''
+		for x in description:
+			if x.lower() not in kirill_and_co:
+				pass
+			else:
+				new += x
+		print(new)
+		choice = input('\nНайти другую?("y/n")Менять жанр("g"): ')		
+		
