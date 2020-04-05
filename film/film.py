@@ -2,10 +2,11 @@ from csv import DictReader
 import random 
 import os
 import requests
-
+import wikipedia
+from colorama import Fore, Style
 
 kirill = ('абвгдеёжзийклмнопрстуфхцчшщъыьэюя')	
-kirill_and_co = ('абвгдеёжзийклмнопрстуфхцчшщъыьэюя ,.?1234567890')
+movie = wikipedia.set_lang('ru')
 
 genre = {
 	 '1':'Drama','2': 'Comedy','3': 'Thriller', '4': 'Action', '5': 'Crime',
@@ -18,9 +19,6 @@ genre_russian = {
 	'6': 'Приключения', '7': 'Мистика', '8': 'Фантастика','9': 'Научная фантастика',
 	'10': 'Историческая', '11': 'Биография', '12': 'Военная', '13': 'Документальная'
 }
-
-
-
 
 
 choice = '1'
@@ -55,19 +53,11 @@ while choice != 'q':
 		find_kirill = [x for x in kirill if x in title.lower()]
 		if not find_kirill:
 			continue
-		print('\nСоветую этот фильм.\n')	
-		print(title + ', ' + year)
+		description = wikipedia.summary(f"{title}(фильм)")
+		print('\nСоветую этот фильм.\n')
+		print(Fore.GREEN + title + ', ' + year)
 		print()
-		description = [x for x in res.text.split('</p>') if 'Редактировать раздел «Сюжет»' in x]
-		s = str(description)
-		x = s.find('<p>')
-		description = s[x:]
-		new = ''
-		for x in description:
-			if x.lower() not in kirill_and_co:
-				pass
-			else:
-				new += x
-		print(new)
+		print(Style.RESET_ALL)
+		print(description)
 		choice = input('\nНайти другую?("y/n")Менять жанр("g"): ')		
 		
