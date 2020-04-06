@@ -3,7 +3,7 @@ import random
 import os
 import requests
 from colorama import Fore, Style
-from bs4 import BeautifulSoup
+
 
 
 kirill = ('абвгдеёжзийклмнопрстуфхцчшщъыьэюя')	
@@ -34,7 +34,12 @@ def translate_title(title, year):
 	res = requests.get('https://ru.wikipedia.org' + link)
 	title = [x for x in res.text.split('\n') if 'title' in x]
 	title_html = title[0]
-	cleantext = BeautifulSoup(title_html, "lxml").text
+	while '<' in title_html:
+		start = title_html.find('<')
+		stop = title_html.find('>')
+		if start != -1:
+			title_html = title_html[:start] + title_html[stop+1:]
+	cleantext = title_html
 	start = cleantext.find( '(' )
 	if start != -1:
  		cleantext = cleantext[:start]
@@ -50,8 +55,12 @@ def get_description(title):
 	res = res.json()
 	movie_id = str([x for  x in res['items'] if x['title'] == title][0]['id'])
 	details = requests.get(f'http://85.239.42.191/partner_api/film/{movie_id}/details', headers=header)
-	html_details = details.json()['short_story']
-	description = BeautifulSoup(html_details, "lxml").text
+	description = details.json()['short_story']
+	while '<' in description:
+		start = description.find('<')
+		stop = description.find('>')
+		if start != -1:
+			description = description[:start] + description[stop+1:]
 	return description
 
 choice = '1'
@@ -87,3 +96,4 @@ while choice != 'q':
 		except Exception:
 			continue
 		choice = input('\nНайти другую?("y/n")Менять жанр("g"): ')		
+	
